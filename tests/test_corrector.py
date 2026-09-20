@@ -14,3 +14,8 @@ def test_school_sentence_correction():
     result = correct_text("i go schol")
     assert result["corrected_text"] == "I go to school"
     assert result["change_count"] == 2
+
+def test_name_sentence_correction():
+    result = correct_text("my nam rohit")
+    assert result["corrected_text"] == "My name is Rohit"
+    assert result["change_count"] == 1

@@ -59,6 +59,22 @@ def correct_text(text):
         corrected
     )
 
+    def correct_name_sentence(match):
+        name = match.group(1).capitalize()
+        replacement = f"My name is {name}"
+        corrections.append({
+            "original": match.group(0),
+            "corrected": replacement,
+            "type": "grammar"
+        })
+        return replacement
+
+    corrected = re.sub(
+        r"(?i)^\s*my\s+name?\s+([a-z]+)\s*$",
+        correct_name_sentence,
+        corrected
+    )
+
     def add_missing_preposition(match):
         original = match.group(0)
         replacement = f"{original[:-6]}to school"
