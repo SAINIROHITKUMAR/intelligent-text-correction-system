@@ -3,6 +3,7 @@ import re
 # Lightweight rule-based correction so the project runs without an external API key.
 COMMON_CORRECTIONS = {
     "teh": "the",
+    "schol": "school",
     "recieve": "receive",
     "seperate": "separate",
     "definately": "definitely",
@@ -24,6 +25,7 @@ COMMON_CORRECTIONS = {
     "id": "I'd",
     "youre": "you're",
     "theyre": "they're",
+    "i": "I",
 }
 
 def _preserve_case(original, replacement):
@@ -51,6 +53,18 @@ def correct_text(text):
         return replacement
 
     corrected = re.sub(r"[A-Za-z]+(?:'[A-Za-z]+)?", replace, text)
+
+    def add_missing_preposition(match):
+        original = match.group(0)
+        replacement = f"{original[:-6]}to school"
+        corrections.append({
+            "original": original,
+            "corrected": replacement,
+            "type": "grammar"
+        })
+        return replacement
+
+    corrected = re.sub(r"\bI go school\b", add_missing_preposition, corrected, flags=re.IGNORECASE)
 
     # Simple punctuation cleanup.
     cleaned = re.sub(r"\s+([,.!?;:])", r"\1", corrected)

@@ -9,3 +9,8 @@ def test_clean_text():
     result = correct_text("This is correct.")
     assert result["corrected_text"] == "This is correct."
     assert result["change_count"] == 0
+
+def test_school_sentence_correction():
+    result = correct_text("i go schol")
+    assert result["corrected_text"] == "I go to school"
+    assert result["change_count"] == 2
