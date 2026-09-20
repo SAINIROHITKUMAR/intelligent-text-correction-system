@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intelligent Text Correction System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <header>
+      <p class="eyebrow">NLP • PYTHON • FLASK</p>
+      <h1>Intelligent Text Correction System</h1>
+      <p class="subtitle">Check spelling and common grammar mistakes with a simple NLP-powered backend.</p>
+    </header>
+
+    <section class="card">
+      <label for="textInput">Enter text</label>
+      <textarea id="textInput" maxlength="5000" placeholder="Example: I definately recieve teh email."></textarea>
+      <div class="actions">
+        <span id="count">0 / 5000</span>
+        <button id="correctBtn">Correct Text</button>
+      </div>
+    </section>
+
+    <section id="resultCard" class="card result hidden">
+      <div class="result-head">
+        <h2>Corrected Text</h2>
+        <span id="changeCount"></span>
+      </div>
+      <p id="correctedText"></p>
+      <h3>Changes</h3>
+      <ul id="changes"></ul>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
