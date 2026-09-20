@@ -1,4 +1,8 @@
 import re
+import json
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 # Lightweight rule-based correction so the project runs without an external API key.
 COMMON_CORRECTIONS = {
@@ -27,6 +31,8 @@ COMMON_CORRECTIONS = {
     "theyre": "they're",
 }
 
+LANGUAGE_TOOL_URL = "https://api.languagetool.org/v2/check"
+
 def _preserve_case(original, replacement):
     if original.isupper():
         return replacement.upper()
@@ -34,7 +40,46 @@ def _preserve_case(original, replacement):
         return replacement[:1].upper() + replacement[1:]
     return replacement
 
-def correct_text(text):
+def _apply_language_tool(text):
+    payload = urlencode({
+        "text": text,
+        "language": "en-US",
+        "enabledOnly": "false",
+    }).encode("utf-8")
+    request = Request(
+        LANGUAGE_TOOL_URL,
+        data=payload,
+        headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "IntelligentTextCorrectionSystem/1.0"},
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=5) as response:
+            matches = json.loads(response.read().decode("utf-8")).get("matches", [])
+    except (HTTPError, URLError, TimeoutError, OSError, ValueError):
+        return text, []
+
+    changes = []
+    corrected = text
+    for match in sorted(matches, key=lambda item: item.get("offset", 0), reverse=True):
+        replacements = match.get("replacements") or []
+        offset = match.get("offset")
+        length = match.get("length")
+        if not replacements or not isinstance(offset, int) or not isinstance(length, int):
+            continue
+        replacement = replacements[0].get("value")
+        if not isinstance(replacement, str):
+            continue
+        original = corrected[offset:offset + length]
+        corrected = corrected[:offset] + replacement + corrected[offset + length:]
+        changes.append({
+            "original": original,
+            "corrected": replacement,
+            "type": "grammar/spelling",
+        })
+    changes.reverse()
+    return corrected, changes
+
+def correct_text(text, use_language_tool=True):
     corrections = []
 
     def replace(match):
@@ -90,6 +135,9 @@ def correct_text(text):
     # Simple punctuation cleanup.
     cleaned = re.sub(r"\s+([,.!?;:])", r"\1", corrected)
     cleaned = re.sub(r"([.!?])([A-Za-z])", r"\1 \2", cleaned)
+
+    if use_language_tool and not corrections:
+        cleaned, corrections = _apply_language_tool(cleaned)
 
     return {
         "original_text": text,
