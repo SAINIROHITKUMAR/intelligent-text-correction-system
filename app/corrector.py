@@ -25,7 +25,6 @@ COMMON_CORRECTIONS = {
     "id": "I'd",
     "youre": "you're",
     "theyre": "they're",
-    "i": "I",
 }
 
 def _preserve_case(original, replacement):
@@ -53,6 +52,12 @@ def correct_text(text):
         return replacement
 
     corrected = re.sub(r"[A-Za-z]+(?:'[A-Za-z]+)?", replace, text)
+
+    corrected = re.sub(
+        r"(?m)(^|[.!?]\s+)i\b",
+        lambda match: f"{match.group(1)}I",
+        corrected
+    )
 
     def add_missing_preposition(match):
         original = match.group(0)
